@@ -7,4 +7,8 @@ main:
 la $t1, V
 
 # asignamos los respectivos valores del vector a cada regristro
-
+lw $s0, 0($t1)
+lw $s1, 4($t1)
+lw $s2, 8($t1)
+lw $s3, 12($t1)
+lw $s4, 16($t1)
