@@ -111,6 +111,7 @@ Alejandro Rodriguez Costello\\[1.5cm]
 
 \vfill
 
+
 \begin{flushleft}
 
 \section*{Evaluación de expresiones}
@@ -226,9 +227,18 @@ sb $t2,res($0) # almacenar $t2 en res
 ``and'' y ``or''.}
 
 
-%% hacer diagrama de flujo
 \subsection*{Cuestión 1.13}
 Lo que ocurre en el programa es lo siguiente: primeramente, inicializa el valor de los registros \$t0 y \$t1 a \texttt{0} a través de un \texttt{and} entre el registro mismo y \texttt{\$0}. Luego, pregunta si el primer valor almacenado en el registro es 0 y, en ese caso, salta condicionalmente a la branch de etiqueta \texttt{igual}, saltándose así la instrucción \texttt{ori}, la cual se encargaba de cargarle el valor \texttt{1} al registro \texttt{\$t0}. Luego, ocurre la misma analogía con el valor almacenado en \texttt{\$t9} y el valor que almacena \texttt{\$t1} (0 si \texttt{\$t9} almacena 0 y 1 en caso contrario). Al final de la evaluación de estos valores, se realiza una comparación \texttt{and} entre ambos valores. En este caso, como ninguno de los dos valores cargados en \texttt{\$t8} y \texttt{\$t9} son 0, entonces el valor guardado en \texttt{res} es 1.
+
+\subsubsection*{Diagrama de flujo 1.13}
+El diagrama de flujo correspondiente al programa es el siguiente:
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.7]{img/proy/1.13.PNG}}
+    \caption{Diagrama de flujo cuestión 1.13}
+    \label{fig:my_label}
+\end{figure}
 
 
 
@@ -411,9 +421,18 @@ El conjunto de instrucciones que implementan la estructura condicional \textit{i
 El valor cargado en \texttt{res} en este caso es \texttt{71}, pues es el resultado de hacer (\texttt{$40+30+\lfloor40/30\rfloor$}).
 
 
-%% hacer diagrama de flujo  
 \subsection*{Cuestión 2.4}
 En el caso que dato2 fuera 0, curiosamente no dio ningún error a simple vista, sino que el valor almacenado en \texttt{res} simplemente es 40, como si el cálculo hubiera sido \texttt{$40+0+0$}.
+
+\subsubsection*{Diagrama de flujo 2.4}
+El diagrama de flujo correspondiente al programa es el siguiente:
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.7]{img/proy/2.4.PNG}}
+    \caption{Diagrama de flujo cuestión 2.4}
+    \label{fig:my_label}
+\end{figure}
 
 
 \subsection*{Cuestión 2.5}
@@ -467,10 +486,18 @@ FIN
 \subsection*{Cuestión 2.7}
 Las instrucciones que evalúan la condición y controlan el flujo del programa son las dos instrucciones \texttt{beq}, ambas verificando que ni el divisor (dato1) ni el dividendo (dato2) sean 0, y en dicho caso los divide. Esto representado en pseudocódigo se vería como un par de sentencias \texttt{if} anidadas o, como el nombre en español ``\texttt{si}''.
 
-
-%% diagrama de flujo
 \subsection*{Cuestión 2.8}
 La instrucción destinada a servir como condición \texttt{if} se trata del salto condicional por rama \texttt{beq}, donde dicha condición es la condición de salida del flujo (si quiero verificar si dos numeros son iguales, entonces la condición de salida sería verificar que no fueran iguales). Por otra parte, lo que implica el no cumplimiento del salto condicional debe ir antes de la etiqueta que simboliza el cumplimiento del salto pero después de la instrucción \texttt{beq}.
+
+\subsubsection*{Diagrama de flujo 2.8}
+El diagrama de flujo correspondiente al programa es el siguiente:
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.7]{img/proy/2.8.PNG}}
+    \caption{Diagrama de flujo cuestión 2.8}
+    \label{fig:my_label}
+\end{figure}
 
 \subsection*{Cuestión 2.9}
 El valor almacenado en \texttt{res} nuevamente es 71, pues se realizó la misma cuenta que en el código anterior, ya que ni \texttt{40} ni \texttt{30} son iguales a \texttt{0}.
@@ -682,7 +709,10 @@ El resultado almacenado en \texttt{res} es \texttt{41}, que efectivamente es la 
 
 
 \subsection*{Cuestión 2.24}
+
 El siguiente código traducido desde el pseudocódigo sería:
+\newpage
+
 \begin{listing}[h]
 \begin{minted}[linenos,frame=single]{nasm}
 
@@ -714,7 +744,11 @@ finpara:
 \end{listing}
 
 
+
+
+\section*{Resolución de ejercicios}
+La resolución de los ejercicios prácticos junto con el código fuente del LaTeX se encuentra presente en \href{https://github.com/maph420/IRC_Practicas_MIPS/tree/master/Practica_2}{mi repositorio de Github}.
+
 \end{flushleft}
 \end{large}
-
 \end{document}
