@@ -90,8 +90,7 @@ derivar_a_funcion:
                 beq $t0, 9, fin
  
                 j mainMenu
-                
-
+               
 # Run after function. Press key to continue
 menu:
 		# imprime mensaje
@@ -287,34 +286,88 @@ endLoop:
 
 
 deleteCategory5:
+		# guardar dir de categoria actual en $t0
+		lw $t0, wclist
+		# guardar dir de lista de categorias en $s0
+		lw $s0, cclist
+		
+		beqz $t0, menu
+		
 		la $a0, deleteCatMessage
 		jal print
 		
-		# guardar dir de categoria actual en $t0
-		lw $t0, wclist
+		lw $t3, 8($t0)
+		move $a0, $t3
+		jal print
+		
 		# guardar dir de su lista de objetos en $t1
 		lw $t1, 4($t0)
+		beqz $t1, delCat		
 			
-		j delLoop
-delLoop:
+		# guardar dir del anterior
+		lw $t2, 0($t1)
+		j delObj
+delObj:
+		lw $t3, 12($t1)
+		# terminar bucle cuando solo quede 1 elem
+		beq $t3, $t2, delLastNode
+		
 		# eliminar nodo actual
 		move $a0, $t1
 		jal delnode
-		lw $t2, 0($t2)
-		
-		beq $t2, $t1, breakDelLoop
 		
 		lw $t1, 12($t1) # ahora $t1 apunta al siguiente nodo
-		j delLoop
-		
-breakDelLoop:
-		move $a0, $t1
+		j delObj
+	
+delLastNode:	
+		addi $t6, $zero, 0
+		lw $t0, wclist
+		sw $t6, 4($t0)
+		move $a0, $t2
 		jal delnode
+		j delCat
+	
+delCat:		
+		lw $s0, cclist
+		lw $t0, wclist
+		# dir de la categoria anterior
+		lw $t1, 0($t0)
 		
+		# quiero borrar la unica categoria
+		beq $t0, $t1, delLastCat
+		
+		# mover wclist hacia la sig categoria
+		lw $a0, 12($t0)
+		sw $a0, wclist
+		
+		# saltar si la cat a eliminar no es la primera de la lista
+		bne $t0, $s0, notFirst
+		# si no, tambien hace flata actualizar la cclist
+		sw $a0, cclist
+
+notFirst:
 		move $a0, $t0
 		jal delnode
 		j menu
 
+delLastCat:	
+		lw $t0, wclist
+		move $a0, $t0
+		jal sfree
+		
+		lw $s0, cclist
+		lw $t1, 8($s0)
+		move $a0, $t1
+		jal sfree
+		move $a0, $s0
+		jal sfree
+		
+		addi $t5, $zero, 0
+		move $t0, $t5
+		
+		addi $t5, $zero, 0
+		sw $t5, cclist
+		j menu
 
 appendObject6:
 		# cargar lista de cat actual en $t5
