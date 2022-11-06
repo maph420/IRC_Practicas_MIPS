@@ -20,7 +20,7 @@ noCatsMessage: 			.asciiz "No hay categorias creadas actualmente\n"
 showNextCatMessage: 		.asciiz "La siguiente categoria es: \n"
 showCatsMessage: 		.asciiz "Las categorias son:\n"
 endLoopMessage:  		.asciiz "Loop is no more"
-asterisk:			.asciiz "(*)"
+asterisk:			.asciiz "(*)"	
 changeCatMessage:		.asciiz "Te moviste hacia la categoria: "
 deleteCatMessage:		.asciiz "Se ha eliminado la categoria "
 newObjMessage:			.asciiz "Ingresar nombre del objeto a crear: \n"
@@ -83,7 +83,7 @@ derivar_a_funcion:
                 beq $t0, 2, siguientecategoria2
                 beq $t0, 3, categoriaanterior3
                 beq $t0, 4, traverseList4
-                # beq $t0, 5, deleteCategory5
+                beq $t0, 5, deleteCategory5
                 beq $t0, 6, appendObject6
                 beq $t0, 7, deleteObject7
                 beq $t0, 8, showObject8
@@ -290,16 +290,29 @@ deleteCategory5:
 		la $a0, deleteCatMessage
 		jal print
 		
-		# guardar cclist en $t0
-		lw $a0, cclist
-		
-		lw $t1, 8($a0)
+		# guardar dir de categoria actual en $t0
+		lw $t0, wclist
+		# guardar dir de su lista de objetos en $t1
+		lw $t1, 4($t0)
+			
+		j delLoop
+delLoop:
+		# eliminar nodo actual
 		move $a0, $t1
-		jal print
+		jal delnode
+		lw $t2, 0($t2)
 		
-		lw $a0, cclist
+		beq $t2, $t1, breakDelLoop
+		
+		lw $t1, 12($t1) # ahora $t1 apunta al siguiente nodo
+		j delLoop
+		
+breakDelLoop:
+		move $a0, $t1
 		jal delnode
 		
+		move $a0, $t0
+		jal delnode
 		j menu
 
 
@@ -383,21 +396,25 @@ deleteObject7:
                 move $t0, $v0 # carga el input en t0
 		
 		lw $t1, wclist
-		lw $t6, 0($t2)
 		
 		# cargar en $t2 lista de objetos
+		
 		lw $t2, 4($t1)
+		lw $s2, 4($t1)
+		lw $t6, 0($t2)
+		lw $t7, 12($t2)
+		lw $s4, 4($t2)
 		
-		beq $t0, $t2, singleElemCase2
+		
 		# si el anterior es igual al mismo, significa que hay un unico nodo en la lista
-		# en ese caso hay que encargarse ademas de poner a 0 (null) el segundo campo de categoria
-		#beq $t6, $t2, singleElemCase1
+		beq $t6, $t2, singleElemCase1
 		
+		# se quiere borrar el primero
+		beq $t0, $s4, singleElemCase2
 		
 		
 		# cargar en $t6 la dir del nodo anterior al primer nodo
 		lw $t6, 0($t2)
-		lw $t7, 12($t2)
 		lw $t8, wclist
 			
 		j lookForID
@@ -434,22 +451,43 @@ singleElemCase1:
 		j menu
 
 # estoy eliminando el primer elemento, sin ser este el unico		
-singleElemCase2:
-		# cargar en $t6 la dir del nodo anterior al primer nodo
+singleElemCase2:		
 		lw $t6, 0($t2)
-		
-
 		j loop3
 # recorro hasta el ultimo nodo de la lista
-loop3:
+loop3:		
 		beq $t2, $t6, break
 		lw $t2, 12($t2)
 		j loop3
 
 break:
-		sw $t7, 12($t2)
+		# $t2 apunta al ult nodo de la lista
+		# $s2 apunta al primer nodo de la lista (actual)
+		# $t7 apunta al siguiente al primer nodo
+		
+		lw $s0, 8($s2)
+		move $a0, $s0
+		jal print
+		
+		lw $s0, 8($t2)
+		move $a0, $s0
+		jal print
+		
+		lw $s3, 12($s2)
+		
+		# el siguiente del ult nodo = siguiente del primer nodo
+		sw $s3, 12($t2)
+		
+		# previo del (siguiente del primer elemento) = ult nodo
 		sw $t2, 0($t7)
-		sw $t7, wclist
+		
+		lw $t6, wclist
+		# nuevo primer nodo = siguiente del antiguo primer ndodo
+		sw $s3, 4($t6)
+		
+		# liberamos su memoria
+		move $a0, $t2
+		jal sfree
 		j menu
 
 showObject8:
