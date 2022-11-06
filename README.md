@@ -18,3 +18,9 @@
 [Ejercicios del 1 al 3](https://github.com/maph420/IRC_Practicas_MIPS/tree/master/Practica_2/Ejercicios%201-3)
 
 [Ejercicios del 4 al 7](https://github.com/maph420/IRC_Practicas_MIPS/tree/master/Practica_2/Ejercicios%204-7)
+
+## Practica 3
+
+[Enunciado](https://github.com/maph420/IRC_Practicas_MIPS/blob/master/Practica_3/enunciado.pdf)
+
+[Resolución](https://github.com/maph420/IRC_Practicas_MIPS/blob/master/Practica_3/trabajo_cobamips3.asm)
