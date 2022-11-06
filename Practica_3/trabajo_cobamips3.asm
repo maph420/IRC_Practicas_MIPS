@@ -1,4 +1,4 @@
-                .data
+.data
                 
 menu1:          		.ascii "1: Crear categoria\n"
 menu2:          		.ascii "2: Siguiente categoria\n"
@@ -31,37 +31,36 @@ space:				.asciiz " "
 rmObjMessage:			.asciiz "Se elimino el objeto "
 
 
-slist:          .word 0 #lista simplemente enlazada para la memoria
-cclist:         .word 0 # category list
-wclist:         .word 0 # working category list
+slist:          		.word 0 # lista enlazada simple
+cclist:         		.word 0 # category list
+wclist:         		.word 0 # working category list
  
-                .text
+.text
 main:
 
 ### MAIN MENU ###
 
 # Menu principal
 mainMenu:
-                # Imprime menu
-
-                la $a0, menu1 # carga el valor a mostrar (menu1)
-                addi $v0, $0, 4 # instruccion print string
+		# Imprime menu
+                la $a0, menu1
+                addi $v0, $0, 4
                 syscall
+          	
+          	# Lee un entero
+                li $v0, 5
+                syscall
+                move $t0, $v0
                 
-                # Lee un entero
-                li $v0, 5 # carga instruccion de leer un numero
+                # Imrpime la opcion elegida
+                la $a0, eleccion
+                addi $v0, $0, 4 
                 syscall
-                move $t0, $v0 # carga el input en t0
-                
-                # Imprime la opcion elegida
-                la $a0, eleccion # carga el valor a mostrar (eleccion)
-                addi $v0, $0, 4 # instruccion print string
+                move $a0, $t0 
+                addi $v0, $0, 1 
                 syscall
-                move $a0, $t0 # carga el input en a0
-                addi $v0, $0, 1 # carga la instruccion print integer
-                syscall
-                la $a0, salto # \n
-                addi $v0, $0, 4 # instruccion print string
+                la $a0, salto
+                addi $v0, $0, 4
                 syscall
  
                 # jal chequeareleccion
@@ -73,12 +72,11 @@ mainMenu:
                 
 # Ejecuta la funcion indicada por el usuario
 derivar_a_funcion:
-                la $a0, buenaeleccion # carga buena eleccion
-                addi $v0, $0, 4 # instruccion print string
+                la $a0, buenaeleccion # Hasta ahora imprime esto porque quiero ver si llega bien a esta parte
+                addi $v0, $0, 4
                 syscall
  
                 # ATENCION: por convencion toda funcion termina en j menu
-                # switch para llamar funcion correspondiente con el input (t0)
                 beq $t0, 1, crearcategoria1
                 beq $t0, 2, siguientecategoria2
                 beq $t0, 3, categoriaanterior3
@@ -93,10 +91,9 @@ derivar_a_funcion:
                
 # Run after function. Press key to continue
 menu:
-		# imprime mensaje
-                la $a0, continueText            
+                la $a0, continueText            #We print the string for the current element.
                 li $v0, 4
-                syscall
+                syscall				#Wait for keypress to continue
  
  		# espera entrada para continuar
                 li $v0, 12
@@ -109,17 +106,13 @@ menu:
 
 # Given a string name, create a new category.
 crearcategoria1:
-                # mostrar mensaje de seleccionar categoria
-                la $a0, selecCat 
+                la $a0, selecCat 		#print message
                 jal print
 
-                # guardar espacio en v0
-                jal smalloc # pide memoria
-                move $a0, $v0 # direccion de memoria alocada para guardar el sting ingresado (a0)
-                li $a1, 16 # cantidad maxima de caracteres a leer
-
-                # leer nombre de categoria (se guarda en a0)
-                li $v0, 8 # instruccion read string
+                jal smalloc # pide memoria para el string
+                move $a0, $v0 
+                li $a1, 16 
+                li $v0, 8 			#enter name
                 syscall
     
                 jal newCategory
@@ -136,63 +129,58 @@ fin:
 # Add new category with string name
 newCategory:
                 
-                # muevo el stack pointer en una palabra (4)
-                addiu $sp, $sp, -4 # el stack pointer se mueve 4 bytes hacia atras
-                sw $ra, 4($sp) # se guarda la dir de la instruccion posterior al ult jal, en el stack pointer
+                # se hace espacio en el stack para almacenar bytes
+                # (en este caso lo usamos para guardar la dir de retorno $ra al momento de saltar)
+                addiu $sp, $sp, -4
+                sw $ra, 4($sp)
 
                 jal newnode
 
-                lw $a0, cclist # almacena en $a0 cclist (inicializado en 0)
-                move $a1, $v0 # almacena en $a1 el nodo con la memoria ya reservada con newnode
-                
+                lw $a0, cclist
+                move $a1, $v0
                 jal addnode
  
-                lw $t0, cclist # almacena cclist en $t0 (hace que cclist apunte al nodo anterior al agregado)
-                bnez $t0, nonEmpty # si $t0 no es 0 salta a nonEmpty
-                sw $v0, wclist # si es vacio guarda wclist en $v0
+                lw $t0, cclist
+                bnez $t0, nonEmpty 
+                sw $v0, wclist
 
-nonEmpty:       sw $v0, cclist # si no es vacio guarda cclist en $v0
-                lw $ra, 4($sp) # vuelve
+nonEmpty:       sw $v0, cclist 
+                lw $ra, 4($sp) 
                 addiu $sp, $sp, 4
                 jr $ra
-
- 
- 
+                
 # $a0: string name
 # $v0: returns node address
 # Create a new node with string name
 newnode:
-                addiu $sp, $sp, -4 # se hace espacio en el stack pointer
-                sw $ra, 4($sp) # se guarda la direccion a la que volver en el stack pointer
-                move $s1, $a0 # se guarda el valor de $a0 (el nombre) a $s1 asi no se pierde en la sig llamada
+                addiu $sp, $sp, -4
+                sw $ra, 4($sp)
+                move $s1, $a0
                  
-                jal smalloc # se pide memoria, la cual se guarda en $v0
-                sw $zero, 4($v0) # se "limpia" la word del nodo en la segunda word | |x| | |
-                sw $s1, 8($v0) # se guarda el nombre del nodo en la tercer word    | | |x| |
+                jal smalloc
+                sw $zero, 4($v0) 	# hopefully a good idea
+                sw $s1, 8($v0
                  
-                lw $ra, 4($sp) # carga la dir de retorno del stack pointer en $ra (y sale del $sp)
-                addiu $sp, $sp, 4 # decrementar espacio del stack pointer en 1 word
-                jr $ra # vuelve a newCategory, despues del ultimo jal llamado
+                lw $ra, 4($sp)
+                addiu $sp, $sp, 4
+                jr $ra
                  
 # $a0 list address
 # $a1 node memory address
 # $v0: new list address
 # Add specified node to given list by argument. Return the new updated list memory address.
 addnode:
-                beqz $a0, empty # chequea si la lista esta vacia (es el primer elemento)
-                # si la lista no es vacia:
-                lw $t0, 0($a0)  # se guarda en un temporal la dir del nodo anterior al nodo al que apunta cclist |x| | | |
-                sw $t0, 0($a1)	# se asigna $t0 como nodo anterior para el nodo que agrego |x| | | |
-
-                sw $a0, 12($a1)	# se asigna la dir del nodo actual almacenado en cclist como el siguiente al que agrego | | | |x|
-                sw $a1, 0($a0)	# se asigna la dir del nodo actual como el anterior al almacenado en cclist |x| | | |
-
-                sw $a1, 12($t0) # se asigna el nodo agregado como el siguiente al anterior a cclist | | | |x|
+                beqz $a0, empty # caso de lista vacia
+                lw $t0, 0($a0)  #t0 is the previous memory address
+                sw $t0, 0($a1)
+                sw $a0, 12($a1)	
+                sw $a1, 0($a0)	
+                sw $a1, 12($t0)
                  
-                move $v0, $a0	# mueve los valores del nodo antiguo actual a $v0
+                move $v0, $a0
                 jr $ra
  
-empty:          # si la lista es vacia, la dir del nodo ant y del post es la misma, si misma
+empty:          
                 sw $a1, 0($a1)   # carga su propia direccion de memoria en la primera word |x| | | |
                 sw $a1, 12($a1) # carga su propia direccion de memoria en la cuartaa word | | | |x|
                 move $v0, $a1	# carga el nodo en $v0
@@ -518,14 +506,6 @@ break:
 		# $s2 apunta al primer nodo de la lista (actual)
 		# $t7 apunta al siguiente al primer nodo
 		
-		lw $s0, 8($s2)
-		move $a0, $s0
-		jal print
-		
-		lw $s0, 8($t2)
-		move $a0, $s0
-		jal print
-		
 		lw $s3, 12($s2)
 		
 		# el siguiente del ult nodo = siguiente del primer nodo
@@ -593,13 +573,13 @@ emptyobj:
 		j menu
 
 
-# imprime, tomando como argumento $a0
+# imprime un string, tomando como argumento $a0
 print:
 	li	$v0, 4
 	syscall
 	jr	$ra
 
-# imprime, tomando como argumento $a0
+# imprime un entero, tomando como argumento $a0
 printint:
 	li	$v0, 1
 	syscall
@@ -609,16 +589,16 @@ printint:
 # $a0 is the pointer to the first field of the node
 # Frees memory for node given its pointer
 delnode:
-                addiu $sp, $sp, -4         # guarda en el stack la direccion para volver
+                addiu $sp, $sp, -4
                 sw $ra, 4($sp)
 
-                lw $t0, ($a0)                   # (t0 )previous node (| | | | |) <- |x| | | |
-                lw $t1, 12($a0)                 # (t1) next node | | | | | . | | | |x| -> (| | | | |)
-                sw $t0, ($t1)                   # store prv node into prv of nxt | | | | | . |x| | | | . |x| | | |
+                lw $t0, ($a0)
+                lw $t1, 12($a0)           
+                sw $t0, ($t1)   
                 addiu $t0, $t0, 12
-                sw $t1, ($t0)                   # store nxt node into nxt of prv | | | |x| . | | | |x| . | | | | |
+                sw $t1, ($t0)                  
 
-                jal sfree            # libera la memoria del nodo en $a0
+                jal sfree   
 
                 lw $ra, 4($sp)
                 addiu $sp, $sp, 4
